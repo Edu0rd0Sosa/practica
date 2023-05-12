@@ -15,8 +15,6 @@ class proveedor(tk.Frame):
         except mysql.connector.Error as e:
             messagebox.showerror("Error de conexión", f"No se pudo conectar a la base de datos: {e}")
             exit()
-       
-        print(self.validar_email("mynamnesoaverra@gmail.com"))
         self.wigets()
     def validar_email(self,email):
         expresion_regular = r"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"
@@ -35,9 +33,17 @@ class proveedor(tk.Frame):
         if not id or not curp or not nombre or not edad or not email or not matricula:
             messagebox.showerror("Error al actualizar al alumno", "Por favor ingrese todos los datos del alumno")
             return
-        
+        if self.validar_nombre(nombre)==False:
+            messagebox.showerror("error el nombre es invalido","ingrese solo letras             ")
+            return
+        if self.validar_edad(edad)==False:
+            messagebox.showerror("La edad es invalida","has agregado una dato que es invalido \n solo agrega una edad de < 99 años")
+            return
         if self.validar_email(email)==False:
             messagebox.showerror("gmail esta mal","No cumples con los requisitos \n ejemplo: mynamesoaverra@gmail.com")
+            return
+        if self.validar_matricula(matricula)==False:
+            messagebox.showerror("Error al agregar la matricula","agrega solo numeros para la matricula \nson 10 digitos en la matricuula")
             return
         # Agregar el nuevo alumno
         self.actualiza(id,nombre,edad, email,curp,matricula)
@@ -48,8 +54,7 @@ class proveedor(tk.Frame):
         self.entrada_edad.delete(0, END)
         self.entrada_email.delete(0, END)
         self.entrada_curp.delete(0, END)
-        self.entrada_matricula.delete(0, END)
-
+        self.entrada_matricula.delete(0, END) 
     def actualiza(self,id,nombre, edad, email,curp,matricula):
         try:
             iid =int(id)
@@ -149,13 +154,39 @@ class proveedor(tk.Frame):
         cursor.execute(sentencia)
         registro = cursor.fetchall()
         return registro
+    def validar_edad(self,edad):
+            try:
+                edad_int = int(edad)
+                return 1 <= edad_int <= 99
+            except ValueError:
+                return False
+    def validar_matricula(self,edad):
+            try:
+                edad_int = int(edad)
+                return 1000000000 <= edad_int <= 9999999999
+            except ValueError:
+                return False
+    def validar_nombre(self,nombre):
+            return bool(re.match(r"^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z])$", nombre))
     def agregar_alumno(self):
         self.table.get_children()
         nombre =self.entrada_nombre.get()
+        if self.validar_nombre(nombre)==False:
+            messagebox.showerror("error el nombre es invalido","ingrese solo letras             ")
+            return
         edad =self.entrada_edad.get()
+        if self.validar_edad(edad)==False:
+            messagebox.showerror("La edad es invalida","has agregado una dato que es invalido \n solo agrega una edad de < 99 años")
+            return
         email =self.entrada_email.get()
+        if self.validar_email(email)==False:
+            messagebox.showerror("tienes el gmail mal escrito","agrega el gmail correcto      ")
+            return
         curp=self.entrada_curp.get()
         matricula=self.entrada_matricula.get()
+        if self.validar_matricula(matricula)==False:
+            messagebox.showerror("Error al agregar la matricula","agrega solo numeros para la matricula \nson 10 digitos en la matricuula")
+            return
         vas=""
         datos=(vas,nombre, edad, email,curp,matricula)
         if nombre and edad and email and curp and matricula!=' ':
